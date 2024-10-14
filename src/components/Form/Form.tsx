@@ -3,13 +3,11 @@ import Stats from '../Stats/Stats';
 import TItem from '../../models/item';
 import './form.css';
 
-// FIXME: где лучше расположить - внутри компонента 'Form' или снаружи ???
 const initialFormState: TItem = {
   date: '',
   km: '',
 };
 
-// FIXME: где лучше расположить - внутри компонента 'Form' или снаружи ???
 const initialListState: TItem[] = [];
 
 const Form = () => {
@@ -24,30 +22,47 @@ const Form = () => {
   function submitHandler(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    // проверка даты на валидность:
-    if (!form.date.match(/\d{2}\.\d{2}\.\d{2}/)) {
-      setForm({ ...form, date: '' });
-      return;
+    // если введенные данные валидны:
+    if (checkData()) {
+      form.km = (+form.km).toFixed(1); // округление километража до десятых долей
+      updateInitialListState(); // обновление массива 'initialListState'
+      setList(initialListState); // изменение состояния <- массив 'list' NOTE: нет ререндера !!!
+      setForm(initialFormState); // изменение состояние <- очищаем форму NOTE: есть ререндер !!!
     }
-
-    // проверка километража на валидность:
-    if (!Number(form.km)) {
-      setForm({ ...form, km: '' });
-      return;
-    }
-
-    form.km = (+form.km).toFixed(1); // округление километража до десятых долей
-    addData(); // обновление массива 'initialListState'
-    setList(initialListState); // изменение состояния <- массив 'list' NOTE: нет ререндера !!!
-    setForm(initialFormState); // изменение состояние <- очищаем форму NOTE: есть ререндер !!!
   }
 
-  function addData() {
+  // проверка валидности введённых данных:
+  function checkData() {
+    let flag = true;
+
+    // проверка даты:
+    if (!form.date.match(/\d{2}\.\d{2}\.\d{2}/)) {
+      setForm({ ...form, date: '' });
+      flag = false;
+    } else {
+      const inputDate = Date.parse(20 + form.date.split('.').reverse().join('-'));
+      // если дату нельзя распарсить или она ещё не наступила:
+      if (isNaN(inputDate) || Date.parse(new Date().toISOString()) < inputDate) {
+        setForm({ ...form, date: '' });
+        flag = false;
+      }
+    } 
+
+    // проверка километража:
+    if (!Number(form.km)) {
+      setForm({ ...form, km: '' });
+      flag = false;
+    }
+
+    return flag;
+  }
+
+  function updateInitialListState() {
     if (initialListState.length) {
       const idx = initialListState.findIndex((el) => el.date === form.date);
       if (idx === -1) {
-        // TODO: добавить сортировку массива !!!
         initialListState.push(form);
+        sortDates();
       } else {
         initialListState[idx].km = (
           +form.km + +initialListState[idx].km
@@ -56,6 +71,15 @@ const Form = () => {
     } else {
       initialListState.push(form);
     }
+  }
+
+  // сортировка дат по убыванию:
+  function sortDates() {
+    initialListState.sort((a: TItem, b: TItem) => {
+      const firstDate = 20 + a.date.split('.').reverse().join('-'); // 20 + '24-10-14' <- 14.10.24
+      const secondDate = 20 + b.date.split('.').reverse().join('-'); // 20 + '24-10-13' <- 13.10.24
+      return Date.parse(secondDate) - Date.parse(firstDate);
+    });
   }
 
   function updateHandler(item: TItem) {
@@ -118,8 +142,8 @@ const Form = () => {
       {/* FIXME: Как не перерисовывать заново весь компонент при событии onChange ??? */}
       <Stats
         list={list}
-        updateHandler={updateHandler}
-        removeHandler={removeHandler}
+        onUpdate={updateHandler}
+        onRemove={removeHandler}
       />
     </>
   );

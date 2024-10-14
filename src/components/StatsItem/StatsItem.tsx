@@ -5,11 +5,11 @@ import './statsItem.css';
 
 interface IStatsItemsProps {
   item: TItem;
-  updateHandler: (item: TItem) => void;
-  removeHandler: (date: string) => void;
+  onUpdate: (item: TItem) => void;
+  onRemove: (date: string) => void;
 }
 
-const StatsItem = ({ item, updateHandler, removeHandler }: IStatsItemsProps) => {
+const StatsItem = ({ item, onUpdate, onRemove }: IStatsItemsProps) => {
   return (
     <li className="stats__info-item">
       <div className="stats__info-date">{item.date}</div>
@@ -19,13 +19,13 @@ const StatsItem = ({ item, updateHandler, removeHandler }: IStatsItemsProps) => 
           src={update}
           className="stats__info-update"
           alt="update"
-          onClick={() => updateHandler(item)}
+          onClick={() => onUpdate(item)}
         ></img>
         <img
           src={remove}
           className="stats__info-remove"
           alt="remove"
-          onClick={() => removeHandler(item.date)}
+          onClick={() => onRemove(item.date)}
         ></img>
       </div>
     </li>

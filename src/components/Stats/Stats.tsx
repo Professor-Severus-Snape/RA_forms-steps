@@ -5,11 +5,11 @@ import './stats.css';
 
 interface IStatsProps {
   list: TItem[];
-  updateHandler: (item: TItem) => void;
-  removeHandler: (date: string) => void;
+  onUpdate: (item: TItem) => void;
+  onRemove: (date: string) => void;
 }
 
-const Stats = ({ list, updateHandler, removeHandler }: IStatsProps) => {
+const Stats = ({ list, onUpdate, onRemove }: IStatsProps) => {
   // FIXME: как сделать, чтобы при событии 'change' не перерисовывался каждый раз весь 'Stats' ???
 
   return (
@@ -24,8 +24,8 @@ const Stats = ({ list, updateHandler, removeHandler }: IStatsProps) => {
           <StatsItem
             key={v4()}
             item={obj}
-            updateHandler={updateHandler}
-            removeHandler={removeHandler}
+            onUpdate={onUpdate}
+            onRemove={onRemove}
           />
         ))}
       </ul>
