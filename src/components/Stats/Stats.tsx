@@ -5,25 +5,13 @@ import remove from '../../assets/remove.svg';
 import './stats.css';
 
 interface IStatsProps {
-  props: TItem;
+  list: TItem[];
+  updateHandler: (item: TItem) => void;
+  removeHandler: (date: string) => void;
 }
 
-const initialState: TItem[] = []; // массив объектов
-
-const Stats = ({ props }: IStatsProps) => {
-  if (props.date && props.km) {
-    if (initialState.length) {
-      const idx = initialState.findIndex((el) => el.date === props.date);
-      if (idx === -1) {
-        // TODO: реализовать сортировку по датам и приведение даты к 'ГГГГ'
-        initialState.push(props);
-      } else {
-        initialState[idx].km = (+props.km + +initialState[idx].km).toFixed(1);
-      }
-    } else {
-      initialState.push(props);
-    }
-  }
+const Stats = ({ list, updateHandler, removeHandler }: IStatsProps) => {
+  // FIXME: как сделать, чтобы при событии 'change' не перерисовывался каждый раз весь 'Stats' ???
 
   return (
     <div className="stats">
@@ -33,7 +21,7 @@ const Stats = ({ props }: IStatsProps) => {
         <li className="stats__title-item">Действия</li>
       </ul>
       <ul className="stats__info-list">
-        {initialState.map((item) => (
+        {list.map((item) => (
           <li key={v4()} className="stats__info-item">
             <div className="stats__info-date">{item.date}</div>
             <div className="stats__info-km">{item.km}</div>
@@ -42,11 +30,13 @@ const Stats = ({ props }: IStatsProps) => {
                 src={update}
                 className="stats__info-update"
                 alt="update"
+                onClick={() => updateHandler(item)}
               ></img>
               <img
                 src={remove}
                 className="stats__info-remove"
                 alt="remove"
+                onClick={() => removeHandler(item.date)}
               ></img>
             </div>
           </li>

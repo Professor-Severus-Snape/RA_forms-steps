@@ -25,3 +25,11 @@
   justify-content: center;
   gap: 50px;
 }
+
+.stats__info-update {
+  cursor: pointer;
+}
+
+.stats__info-remove {
+  cursor: pointer;
+}

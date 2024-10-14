@@ -1,24 +1,23 @@
 import { useState } from 'react';
 import Stats from '../Stats/Stats';
+import TItem from '../../models/item';
 import './form.css';
 
-// где лучше расположить - внутри компонента 'Form' или снаружи ???
-const initialFormState = {
+// FIXME: где лучше расположить - внутри компонента 'Form' или снаружи ???
+const initialFormState: TItem = {
   date: '',
   km: '',
 };
 
-// как передать данные, не вынося переменную в глобальную область видимости ???
-let props = initialFormState;
+// FIXME: где лучше расположить - внутри компонента 'Form' или снаружи ???
+const initialListState: TItem[] = [];
 
 const Form = () => {
-  const [form, setForm] = useState(initialFormState);
+  const [form, setForm] = useState<TItem>(initialFormState);
+  const [list, setList] = useState<TItem[]>(initialListState); // FIXME: кто владелец состояния ???
 
   function changeHandler(event: React.ChangeEvent<HTMLInputElement>) {
-    props = initialFormState; // очищение пропсов - как  правильно ???
-
     const { name, value } = event.target;
-
     setForm({ ...form, [name]: value.trim().replace(',', '.') });
   }
 
@@ -37,9 +36,42 @@ const Form = () => {
       return;
     }
 
-    props = form; // где надо формировать пропс для компонента 'Stats' и как ???
+    form.km = (+form.km).toFixed(1); // округление километража до десятых долей
+    addData(); // обновление массива 'initialListState'
+    setList(initialListState); // изменение состояния <- массив 'list' NOTE: нет ререндера !!!
+    setForm(initialFormState); // изменение состояние <- очищаем форму NOTE: есть ререндер !!!
+  }
 
-    setForm(initialFormState); // очищаем форму
+  function addData() {
+    if (initialListState.length) {
+      const idx = initialListState.findIndex((el) => el.date === form.date);
+      if (idx === -1) {
+        // TODO: добавить сортировку массива !!!
+        initialListState.push(form);
+      } else {
+        initialListState[idx].km = (
+          +form.km + +initialListState[idx].km
+        ).toFixed(1);
+      }
+    } else {
+      initialListState.push(form);
+    }
+  }
+
+  function updateHandler(item: TItem) {
+    const idx = initialListState.findIndex((el) => el.date === item.date);
+    initialListState.splice(idx, 1); // удаляем элемент из Stats
+    setList(initialListState); // формируем новый список для Stats NOTE: нет ререндера !!!
+    setForm(item); // меняем состояние -> переносим данные в форму NOTE: есть ререндер!!!
+  }
+
+  function removeHandler(date: string) {
+    const idx = initialListState.findIndex((el) => el.date === date);
+    initialListState.splice(idx, 1); // удаляем элемент из Stats
+    setList(initialListState); // формируем новый список для Stats NOTE: нет ререндера !!!
+    // setForm(form);                                           // NOTE: нет ререндера !!!
+    // setForm(initialFormState);                               // NOTE: нет ререндера !!!
+    setForm({ ...form }); // FIXME: как правильно вызвать ререндер в этой функции ???
   }
 
   return (
@@ -82,7 +114,13 @@ const Form = () => {
           ОК
         </button>
       </form>
-      <Stats props={props} /> {/* <- корректные пропсы только! при валидном submit-е */}
+
+      {/* FIXME: Как не перерисовывать заново весь компонент при событии onChange ??? */}
+      <Stats
+        list={list}
+        updateHandler={updateHandler}
+        removeHandler={removeHandler}
+      />
     </>
   );
 };
