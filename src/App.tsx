@@ -1,13 +1,7 @@
 import Form from './components/Form/Form';
-import Stats from './components/Stats/Stats';
 
 function App() {
-  return (
-    <>
-      <Form />
-      <Stats />
-    </>
-  );
+  return <Form />;
 }
 
 export default App;
