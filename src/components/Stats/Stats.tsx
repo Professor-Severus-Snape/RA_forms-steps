@@ -1,7 +1,6 @@
-import { v4 } from 'uuid'; // генерация уникальных id
+import { v4 } from 'uuid';
+import StatsItem from '../StatsItem/StatsItem';
 import TItem from '../../models/item';
-import update from '../../assets/pencil.svg';
-import remove from '../../assets/remove.svg';
 import './stats.css';
 
 interface IStatsProps {
@@ -21,25 +20,13 @@ const Stats = ({ list, updateHandler, removeHandler }: IStatsProps) => {
         <li className="stats__title-item">Действия</li>
       </ul>
       <ul className="stats__info-list">
-        {list.map((item) => (
-          <li key={v4()} className="stats__info-item">
-            <div className="stats__info-date">{item.date}</div>
-            <div className="stats__info-km">{item.km}</div>
-            <div className="stats__info-change">
-              <img
-                src={update}
-                className="stats__info-update"
-                alt="update"
-                onClick={() => updateHandler(item)}
-              ></img>
-              <img
-                src={remove}
-                className="stats__info-remove"
-                alt="remove"
-                onClick={() => removeHandler(item.date)}
-              ></img>
-            </div>
-          </li>
+        {list.map((obj) => (
+          <StatsItem
+            key={v4()}
+            item={obj}
+            updateHandler={updateHandler}
+            removeHandler={removeHandler}
+          />
         ))}
       </ul>
     </div>

@@ -1,0 +1,21 @@
+.stats__info-item {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  place-items: center;
+
+  padding: 10px 0;
+}
+
+.stats__info-change {
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+}
+
+.stats__info-update {
+  cursor: pointer;
+}
+
+.stats__info-remove {
+  cursor: pointer;
+}
