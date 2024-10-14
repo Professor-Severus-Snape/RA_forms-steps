@@ -1,3 +1,5 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/yghuh1sjqg6tw35r?svg=true)](https://ci.appveyor.com/project/Professor-Severus-Snape/ra-forms-steps)
+
 # Учёт тренировок
 
 Вы решили реализовать небольшое приложение, которое хранит данные о тренировках и прогулках, которые вы совершаете в течение недели.
