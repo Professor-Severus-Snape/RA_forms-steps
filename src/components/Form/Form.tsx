@@ -3,104 +3,106 @@ import Stats from '../Stats/Stats';
 import TItem from '../../models/item';
 import './form.css';
 
-const initialFormState: TItem = {
-  date: '',
-  km: '',
-};
-
-const initialListState: TItem[] = [];
-
 const Form = () => {
-  const [form, setForm] = useState<TItem>(initialFormState);
-  const [list, setList] = useState<TItem[]>(initialListState); // FIXME: кто владелец состояния ???
+  const [form, setForm] = useState<TItem>({ date: '', km: '' });
+  const [list, setList] = useState<TItem[]>([]); // FIXME: кто владелец состояния ???
 
-  function changeHandler(event: React.ChangeEvent<HTMLInputElement>) {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-    setForm({ ...form, [name]: value.trim().replace(',', '.') });
-  }
+    setForm({ ...form, [name]: value.trim().replace(',', '.') }); // изменение состояния
+  };
 
-  function submitHandler(event: React.FormEvent<HTMLFormElement>) {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     // если введенные данные валидны:
     if (checkData()) {
-      form.km = (+form.km).toFixed(1); // округление километража до десятых долей
-      updateInitialListState(); // обновление массива 'initialListState'
-      setList(initialListState); // изменение состояния <- массив 'list' NOTE: нет ререндера !!!
-      setForm(initialFormState); // изменение состояние <- очищаем форму NOTE: есть ререндер !!!
+      const newList = createNewList(); // свежий массив с актуальными данными
+      setList(newList); // изменение состояния <- обновляем list актуальными данными
+      setForm({ date: '', km: '' }); // изменение состояния <- очищаем форму
     }
-  }
+  };
 
   // проверка валидности введённых данных:
-  function checkData() {
+  const checkData = () => {
     let flag = true;
 
     // проверка даты:
     if (!form.date.match(/\d{2}\.\d{2}\.\d{2}/)) {
-      setForm({ ...form, date: '' });
+      setForm({ ...form, date: '' }); // изменение состояния
       flag = false;
     } else {
-      const inputDate = Date.parse(20 + form.date.split('.').reverse().join('-'));
-      // если дату нельзя распарсить или она ещё не наступила:
-      if (isNaN(inputDate) || Date.parse(new Date().toISOString()) < inputDate) {
-        setForm({ ...form, date: '' });
+      const inputDate = 20 + form.date.split('.').reverse().join('-'); // '2024-10-17'
+      // текущая дата с учетом часовых поясов ('2024-10-17'):
+      const localDate = new Date(
+        new Date().getTime() - new Date().getTimezoneOffset() * 1000 * 60
+      )
+        .toISOString()
+        .slice(0, 10);
+      // если дату нельзя распарсить или она ещё не наступила (1731801600000 > 1729183981966):
+      if (
+        isNaN(Date.parse(inputDate)) ||
+        Date.parse(inputDate) > Date.parse(localDate)
+      ) {
+        setForm({ ...form, date: '' }); // изменение состояния <- очищаем поле даты
         flag = false;
       }
-    } 
+    }
 
     // проверка километража:
     if (!Number(form.km)) {
-      setForm({ ...form, km: '' });
+      setForm({ ...form, km: '' }); // изменение состояния <- очищаем поле километража
       flag = false;
     }
 
     return flag;
-  }
+  };
 
-  function updateInitialListState() {
-    if (initialListState.length) {
-      const idx = initialListState.findIndex((el) => el.date === form.date);
+  const createNewList = () => {
+    let newList: TItem[] = [];
+    const km: string = (+form.km).toFixed(1); // округление km до десятых долей
+
+    if (list.length) {
+      const idx = list.findIndex((el) => el.date === form.date);
       if (idx === -1) {
-        initialListState.push(form);
-        sortDates();
+        newList = [...list, { ...form, km }];
+        sortDates(newList);
       } else {
-        initialListState[idx].km = (
-          +form.km + +initialListState[idx].km
-        ).toFixed(1);
+        newList = list.map((item, index) => {
+          if (index === idx) {
+            item.km = (Number(item.km) + Number(km)).toFixed(1); // округление km при сложении
+          }
+          return item;
+        });
       }
     } else {
-      initialListState.push(form);
+      newList = [...list, { ...form, km }];
     }
-  }
+
+    return newList;
+  };
 
   // сортировка дат по убыванию:
-  function sortDates() {
-    initialListState.sort((a: TItem, b: TItem) => {
-      const firstDate = 20 + a.date.split('.').reverse().join('-'); // 20 + '24-10-14' <- 14.10.24
-      const secondDate = 20 + b.date.split('.').reverse().join('-'); // 20 + '24-10-13' <- 13.10.24
-      return Date.parse(secondDate) - Date.parse(firstDate);
+  const sortDates = (newList: TItem[]) => {
+    newList.sort((first: TItem, second: TItem) => {
+      const firstDate = 20 + first.date.split('.').reverse().join('-'); // 13.10.24 -> 2024-10-13
+      const secondDate = 20 + second.date.split('.').reverse().join('-'); // 14.10.24 -> 2024-10-14
+      return Date.parse(secondDate) - Date.parse(firstDate); // парсим даты формата ISO 8601
     });
-  }
+  };
 
-  function updateHandler(item: TItem) {
-    const idx = initialListState.findIndex((el) => el.date === item.date);
-    initialListState.splice(idx, 1); // удаляем элемент из Stats
-    setList(initialListState); // формируем новый список для Stats NOTE: нет ререндера !!!
-    setForm(item); // меняем состояние -> переносим данные в форму NOTE: есть ререндер!!!
-  }
+  const handleUpdate = (item: TItem) => {
+    setList(list.filter((el) => el.date !== item.date)); // фильтруем массив, не мутируя его
+    setForm(item); // изменение состояния <- перекидываем данные из элемента в форму
+  };
 
-  function removeHandler(date: string) {
-    const idx = initialListState.findIndex((el) => el.date === date);
-    initialListState.splice(idx, 1); // удаляем элемент из Stats
-    setList(initialListState); // формируем новый список для Stats NOTE: нет ререндера !!!
-    // setForm(form);                                           // NOTE: нет ререндера !!!
-    // setForm(initialFormState);                               // NOTE: нет ререндера !!!
-    setForm({ ...form }); // FIXME: как правильно вызвать ререндер в этой функции ???
-  }
+  const handleRemove = (date: string) => {
+    setList(list.filter((el) => el.date !== date)); // фильтруем массив, не мутируя его
+  };
 
   return (
     <>
-      <form className="form" onSubmit={submitHandler}>
+      <form className="form" onSubmit={handleSubmit}>
         <div className="form__date">
           <label htmlFor="date" className="form__date-label">
             Дата (ДД.ММ.ГГ):
@@ -111,10 +113,10 @@ const Form = () => {
             type="text"
             minLength={8}
             maxLength={8}
-            placeholder="Введите верно дату.."
+            placeholder="Введите верно дату ..."
             required
             name="date"
-            onChange={changeHandler}
+            onChange={handleChange}
             value={form.date}
           />
         </div>
@@ -127,10 +129,10 @@ const Form = () => {
             className="form__km-input"
             type="text"
             maxLength={6}
-            placeholder="Пройденное расстояние в км..."
+            placeholder="Пройденное расстояние в км ..."
             required
             name="km"
-            onChange={changeHandler}
+            onChange={handleChange}
             value={form.km}
           />
         </div>
@@ -140,11 +142,7 @@ const Form = () => {
       </form>
 
       {/* FIXME: Как не перерисовывать заново весь компонент при событии onChange ??? */}
-      <Stats
-        list={list}
-        onUpdate={updateHandler}
-        onRemove={removeHandler}
-      />
+      <Stats list={list} onUpdate={handleUpdate} onRemove={handleRemove} />
     </>
   );
 };

@@ -11,6 +11,7 @@ html {
 
 button {
   background-color: #fff;
+  cursor: pointer;
 }
 
 ul,
