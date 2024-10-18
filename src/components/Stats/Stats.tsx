@@ -10,7 +10,9 @@ interface IStatsProps {
 }
 
 const Stats = ({ list, onUpdate, onRemove }: IStatsProps) => {
-  // FIXME: как сделать, чтобы при событии 'change' не перерисовывался каждый раз весь 'Stats' ???
+  const statItems = list.map((obj) => (
+    <StatsItem key={v4()} item={obj} onUpdate={onUpdate} onRemove={onRemove} />
+  ));
 
   return (
     <div className="stats">
@@ -19,16 +21,7 @@ const Stats = ({ list, onUpdate, onRemove }: IStatsProps) => {
         <li className="stats__title-item">Пройдено км</li>
         <li className="stats__title-item">Действия</li>
       </ul>
-      <ul className="stats__info-list">
-        {list.map((obj) => (
-          <StatsItem
-            key={v4()}
-            item={obj}
-            onUpdate={onUpdate}
-            onRemove={onRemove}
-          />
-        ))}
-      </ul>
+      <ul className="stats__info-list">{statItems}</ul>
     </div>
   );
 };

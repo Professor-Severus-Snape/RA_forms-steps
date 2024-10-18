@@ -1,5 +1,4 @@
 import { v4 } from 'uuid'; // FIXME: каждый раз новый 'id' у элемента при событии 'change' !!!
-
 import TItem from '../../models/item';
 import update from '../../assets/pencil.svg';
 import remove from '../../assets/remove.svg';
@@ -22,13 +21,13 @@ const StatsItem = ({ item, onUpdate, onRemove }: IStatsItemsProps) => {
           className="stats__info-update"
           alt="update"
           onClick={() => onUpdate(item)}
-        ></img>
+        />
         <img
           src={remove}
           className="stats__info-remove"
           alt="remove"
           onClick={() => onRemove(item.date)}
-        ></img>
+        />
       </div>
     </li>
   );
