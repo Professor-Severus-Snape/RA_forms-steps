@@ -1,4 +1,3 @@
-import { v4 } from 'uuid';
 import StatsItem from '../StatsItem/StatsItem';
 import TItem from '../../models/item';
 import './stats.css';
@@ -11,7 +10,7 @@ interface IStatsProps {
 
 const Stats = ({ list, onUpdate, onRemove }: IStatsProps) => {
   const statItems = list.map((obj) => (
-    <StatsItem key={v4()} item={obj} onUpdate={onUpdate} onRemove={onRemove} />
+    <StatsItem key={obj.date} item={obj} onUpdate={onUpdate} onRemove={onRemove} />
   ));
 
   return (

@@ -8,67 +8,31 @@ const App = () => {
   const [list, setList] = useState<TItem[]>([]);
 
   // обработчик cобытия 'change' на инпутах:
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
-    const currentForm = { ...form, [name]: value.trim().replace(',', '.') };
+  const handleInputChange = (currentForm: TItem) => {
     setForm(currentForm); // ререндер (состояние form) -> обновление полей формы
   };
 
   // обработчик cобытия 'submit' на форме:
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (isValidData()) {
-      const newList = createNewList(); // свежий массив с актуальными данными
-      setList(newList); // ререндер (состояние list) -> актуализация массива с данными
-      setForm({ date: '', km: '' }); // ререндер (состояние form) -> очистка полей формы
+  const handleSubmit = (newForm: TItem) => {
+    if (newForm.date === '' || newForm.km === '') {
+      setForm(newForm); // ререндер (состояние form) -> сброс невалидного инпута
+      return;
     }
-  };
-
-  // проверка валидности данных формы:
-  const isValidData = () => {
-    let flag = true;
-
-    // проверка даты:
-    if (!form.date.match(/\d{2}\.\d{2}\.\d{2}/)) {
-      setForm({ ...form, date: '' }); // ререндер (состояние form) -> сброс инпута с датой
-      flag = false;
-    } else {
-      const inputDate = 20 + form.date.split('.').reverse().join('-'); // '2024-10-17'
-      // текущая дата с учетом часовых поясов ('2024-10-17'):
-      const localDate = new Date(
-        new Date().getTime() - new Date().getTimezoneOffset() * 1000 * 60
-      )
-        .toISOString()
-        .slice(0, 10);
-      // если дату нельзя распарсить или она ещё не наступила (1731801600000 > 1729183981966):
-      if (
-        isNaN(Date.parse(inputDate)) ||
-        Date.parse(inputDate) > Date.parse(localDate)
-      ) {
-        setForm({ ...form, date: '' }); // ререндер (состояние form) -> сброс инпута с датой
-        flag = false;
-      }
-    }
-
-    // проверка километража:
-    if (!Number(form.km)) {
-      setForm({ ...form, km: '' }); // ререндер (состояние form) -> сброс инпута с километражем
-      flag = false;
-    }
-
-    return flag;
+    // если данные полей ввода валидны и полные:
+    const newList = createNewList(newForm); // свежий массив с актуальными данными
+    setList(newList); // ререндер (состояние list) -> актуализация массива с данными
+    setForm({ date: '', km: '' }); // ререндер (состояние form) -> очистка полей формы
   };
 
   // создание нового массива с актуализированными данными:
-  const createNewList = () => {
+  const createNewList = (newForm: TItem) => {
     let newList: TItem[] = [];
-    const km = (+form.km).toFixed(1); // округление km до десятых долей
+    const km = (+newForm.km).toFixed(1); // округление km до десятых долей
 
     if (list.length) {
-      const idx = list.findIndex((el) => el.date === form.date);
+      const idx = list.findIndex((el) => el.date === newForm.date);
       if (idx === -1) {
-        newList = [...list, { ...form, km }];
+        newList = [...list, { ...newForm, km }];
         sortDates(newList); // сортируем массив по датам
       } else {
         newList = list.map((item, index) => {
@@ -79,7 +43,7 @@ const App = () => {
         });
       }
     } else {
-      newList = [{ ...form, km }];
+      newList = [{ ...newForm, km }];
     }
 
     return newList;

@@ -1,4 +1,3 @@
-import { v4 } from 'uuid'; // FIXME: каждый раз новый 'id' у элемента при событии 'change' !!!
 import TItem from '../../models/item';
 import update from '../../assets/pencil.svg';
 import remove from '../../assets/remove.svg';
@@ -12,7 +11,7 @@ interface IStatsItemsProps {
 
 const StatsItem = ({ item, onUpdate, onRemove }: IStatsItemsProps) => {
   return (
-    <li id={v4()} className="stats__info-item">
+    <li className="stats__info-item">
       <div className="stats__info-date">{item.date}</div>
       <div className="stats__info-km">{item.km}</div>
       <div className="stats__info-change">
