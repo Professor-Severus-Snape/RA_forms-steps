@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Form from './components/Form/Form';
 import TItem from './models/item';
 import Stats from './components/Stats/Stats';
+import sortDates from './utils/sortDates';
 
 const App = () => {
   const [form, setForm] = useState<TItem>({ date: '', km: '' });
@@ -47,15 +48,6 @@ const App = () => {
     }
 
     return newList;
-  };
-
-  // сортировка дат по убыванию:
-  const sortDates = (newList: TItem[]) => {
-    newList.sort((first: TItem, second: TItem) => {
-      const firstDate = 20 + first.date.split('.').reverse().join('-'); // 17.10.24 -> 2024-10-17
-      const secondDate = 20 + second.date.split('.').reverse().join('-'); // 18.10.24 -> 2024-10-18
-      return Date.parse(secondDate) - Date.parse(firstDate); // парсим даты в формате ISO 8601
-    });
   };
 
   const handleUpdateItem = (item: TItem) => {
